@@ -8,14 +8,11 @@ Usage
 
 ```javascript
 > var mpu6050 = require('mpu6050')
-undefined
 > var mpu = new mpu6050()
-undefined
-> mpu.initialize() # initialize the module
-undefined
-> mpu.testConnection() # always good to test the I2C connection first
+> mpu.initialize()
+> mpu.testConnection()
 true
-> mpu.getMotion6() # get the raw data
+> mpu.getMotion6()
 [ 16,
   356,
   15828,
@@ -29,7 +26,6 @@ true
   -20,
   48,
   51 ]
-> mpu.setSleepEnabled(1) # put back to sleep when finished
-undefined
+> mpu.setSleepEnabled(1)
 ```
 
