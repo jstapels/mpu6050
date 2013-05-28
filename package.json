@@ -1,0 +1,25 @@
+{
+  "name": "MPU6050",
+  "version": "0.1.0",
+  "description": "A minimal module for reading the raw data from an MPU6050.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
+  },
+  "repository": {
+    "type" : "git",
+    "git" : "http://github.com/jstapels/MPU6050.git",
+  },
+  "dependencies": {
+    "i2c" : "*"
+   },
+  "keywords": [
+    "Node.js",
+    "mpu6050",
+    "Eclipse",
+    "Nodeclipse"
+  ],
+  "author": "Jason Stapels",
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
