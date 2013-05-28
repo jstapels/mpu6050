@@ -13,13 +13,18 @@ npm install mpu6050
 ## Usage
 
 ```javascript
-var mpu6050 = require('mpu6050')
-var mpu = new mpu6050()
-mpu.initialize()
+var mpu6050 = require('mpu6050');
 
+# Instantiate and initialize.
+var mpu = new mpu6050();
+mpu.initialize();
+
+# Test the connection before using.
 if (mpu.testConnection()) {
   console.log(mpu.getMotion6());
 }
-mpu.setSleepEnabled(1)
+
+# Put the MPU6050 back to sleep.
+mpu.setSleepEnabled(1);
 ```
 
