@@ -1,5 +1,5 @@
 {
-  "name": "MPU6050",
+  "name": "mpu6050",
   "version": "0.1.0",
   "description": "A minimal module for reading the raw data from an MPU6050.",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type" : "git",
-    "git" : "http://github.com/jstapels/MPU6050.git",
+    "git" : "http://github.com/jstapels/MPU6050.git"
   },
   "dependencies": {
     "i2c" : "*"

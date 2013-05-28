@@ -35,7 +35,8 @@ var i2c = require('i2c');
  * Default constructor, uses default I2C address or default SS Pin if SPI
  * @see MPU6050.DEFAULT_ADDRESS
  */
-function MPU6050(address) {
+function MPU6050(device, address) {
+  this.device = device || '/dev/i2c-1';
   this.address = address || MPU6050.DEFAULT_ADDRESS;
 }
 
@@ -52,7 +53,7 @@ MPU6050.DEFAULT_ADDRESS = MPU6050.ADDRESS_AD0_LOW;
  * the default internal clock source.
  */
 MPU6050.prototype.initialize = function() {
-  this.i2cdev = new I2cDev(this.address, {device : '/dev/i2c-1'});
+  this.i2cdev = new I2cDev(this.address, {device : this.device});
   
   this.setClockSource(MPU6050.CLOCK_PLL_XGYRO);
   this.setFullScaleGyroRange(MPU6050.GYRO_FS_250);
