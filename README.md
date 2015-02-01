@@ -20,11 +20,15 @@ var mpu = new mpu6050();
 mpu.initialize();
 
 // Test the connection before using.
-if (mpu.testConnection()) {
-  console.log(mpu.getMotion6());
-}
+mpu.testConnection(function(err, testPassed) {
+  if (testPassed) {
+    mpu.getMotion6(function(err, data){
+      console.log(data);
+    });
+    // Put the MPU6050 back to sleep.
+    mpu.setSleepEnabled(1);
+  }
+});
 
-// Put the MPU6050 back to sleep.
-mpu.setSleepEnabled(1);
 ```
 
