@@ -1,6 +1,6 @@
 {
   "name": "mpu6050",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A minimal module for reading the raw data from an MPU6050.",
   "main": "index.js",
   "scripts": {

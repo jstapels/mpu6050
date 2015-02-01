@@ -69,7 +69,6 @@ MPU6050.prototype.initialize = function(callback) {
  * Verify the I2C connection.
  * Make sure the device is connected and responds as expected.
  * @param callback
- * @return True if connection is valid, false otherwise
  */
 MPU6050.prototype.testConnection = function(callback) {
   this.getDeviceID(function (err, data) {
@@ -94,7 +93,7 @@ MPU6050.WHO_AM_I_LENGTH = 6;
  * @return Device ID (should be 0x68, 104 dec, 150 oct)
  */
 MPU6050.prototype.getDeviceID = function(callback) {
-  return this.i2cdev.readBits(MPU6050.RA_WHO_AM_I, MPU6050.WHO_AM_I_BIT, MPU6050.WHO_AM_I_LENGTH, callback);
+  this.i2cdev.readBits(MPU6050.RA_WHO_AM_I, MPU6050.WHO_AM_I_BIT, MPU6050.WHO_AM_I_LENGTH, callback);
 };
 
 /**
@@ -131,10 +130,9 @@ MPU6050.GYRO_FS_2000 = 0x03;
  * </pre>
  *
  * @param callback
- * @return Current full-scale gyroscope range setting
  */
 MPU6050.prototype.getFullScaleGyroRange = function(callback) {
-  return this.i2cdev.readBits(MPU6050.RA_GYRO_CONFIG, MPU6050.GCONFIG_FS_SEL_BIT, MPU6050.GCONFIG_FS_SEL_LENGTH, callback);
+  this.i2cdev.readBits(MPU6050.RA_GYRO_CONFIG, MPU6050.GCONFIG_FS_SEL_BIT, MPU6050.GCONFIG_FS_SEL_LENGTH, callback);
 };
 
 /**
@@ -173,10 +171,9 @@ MPU6050.ACCEL_FS_16 = 0x03;
  * </pre>
  *
  * @param callback
- * @return Current full-scale accelerometer range setting
  */
 MPU6050.prototype.getFullScaleAccelRange = function(callback) {
-  return this.i2cdev.readBits(MPU6050.RA_ACCEL_CONFIG, MPU6050.ACONFIG_AFS_SEL_BIT, MPU6050.ACONFIG_AFS_SEL_LENGTH, callback);
+  this.i2cdev.readBits(MPU6050.RA_ACCEL_CONFIG, MPU6050.ACONFIG_AFS_SEL_BIT, MPU6050.ACONFIG_AFS_SEL_LENGTH, callback);
 };
 
 /**
@@ -230,7 +227,6 @@ MPU6050.RA_ACCEL_ZOUT_L = 0x40;
  * </pre>
  *
  * @param callback
- * @return An array containing the three accellerations.
  */
 MPU6050.prototype.getAcceleration = function(callback) {
   this.i2cdev.readBytes(MPU6050.RA_ACCEL_XOUT_H, 6, function(err, buffer){
@@ -331,12 +327,11 @@ MPU6050.PWR1_CLKSEL_LENGTH = 3;
  * selections for each of the gyros should be used if any gyro axis is not used
  * by the application.
  * @param callback
- * @return Current sleep mode enabled status
  * @see MPU6050_RA_PWR_MGMT_1
  * @see MPU6050_PWR1_SLEEP_BIT
  */
 MPU6050.prototype.getSleepEnabled = function(callback) {
-  return this.i2cdev.readBit(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_SLEEP_BIT, callback);
+  this.i2cdev.readBit(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_SLEEP_BIT, callback);
 };
 
 /** Set sleep mode status.
@@ -352,10 +347,9 @@ MPU6050.prototype.setSleepEnabled = function(enabled) {
 /**
  * Get clock source setting.
  * @param callback
- * @return Current clock source setting
  */
 MPU6050.prototype.getClockSource = function (callback) {
-  return this.i2cdev.readBits(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_CLKSEL_BIT, MPU6050.PWR1_CLKSEL_LENGTH, callback);
+  this.i2cdev.readBits(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_CLKSEL_BIT, MPU6050.PWR1_CLKSEL_LENGTH, callback);
 };
 
 /**
@@ -417,14 +411,15 @@ I2cDev.prototype.readBits = function(func, bit, bitLength, callback) {
 };
 
 I2cDev.prototype.readBit = function(func, bit, bitLength, callback) {
-  return this.readBits(func, bit, 1, callback);
+  this.readBits(func, bit, 1, callback);
 };
 
 I2cDev.prototype.writeBits = function(func, bit, bitLength, value) {
-  this.readBytes(func, 1, function(err, oldValue) {
-    var mask = this.bitMask(bit, bitLength);
+  var self = this;
+  self.readBytes(func, 1, function(err, oldValue) {
+    var mask = self.bitMask(bit, bitLength);
     var newValue = oldValue ^ ((oldValue ^ (value << bit)) & mask);
-    this.writeBytes(func, [newValue], function (err) {
+    self.writeBytes(func, [newValue], function (err) {
       if (err) {
         throw err;
       }
