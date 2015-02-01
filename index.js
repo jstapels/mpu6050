@@ -76,7 +76,7 @@ MPU6050.prototype.testConnection = function(callback) {
       return callback(err);
     }
     // Test device id.
-    callback(data === 0x34);
+    callback(null, data === 0x34);
   }); // ;
 };
 
