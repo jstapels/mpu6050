@@ -421,13 +421,14 @@ I2cDev.prototype.readBit = function(func, bit, bitLength, callback) {
 };
 
 I2cDev.prototype.writeBits = function(func, bit, bitLength, value) {
-  var oldValue = this.readBytes(func, 1);
-  var mask = this.bitMask(bit, bitLength);
-  var newValue = oldValue ^ ((oldValue ^ (value << bit)) & mask);
-  this.writeBytes(func, [newValue], function (err) {
-    if (err) {
-      throw err;
-    }
+  this.readBytes(func, 1, function(err, oldValue) {
+    var mask = this.bitMask(bit, bitLength);
+    var newValue = oldValue ^ ((oldValue ^ (value << bit)) & mask);
+    this.writeBytes(func, [newValue], function (err) {
+      if (err) {
+        throw err;
+      }
+    });
   });
 };
 
