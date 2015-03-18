@@ -1,6 +1,6 @@
 {
   "name": "mpu6050",
-  "version": "0.2.3",
+  "version": "0.1.3",
   "description": "A minimal module for reading the raw data from an MPU6050.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/arduino-inbox/mpu6050.git"
+    "url": "https://github.com/jstapels/mpu6050.git"
   },
   "dependencies": {
     "i2c" : "*"
