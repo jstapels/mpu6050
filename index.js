@@ -2,7 +2,11 @@
  * MPU6050 minimal device I2C library for Node.js
  * Based on Jeff Rowberg's MPU6050 I2C device library.
  * 2012/05/26 by Jason Stapels <jstapels@gmail.com>
- * 
+ *
+ * Added callback to conform to i2c package changes.
+ * 2015/02/01 by Roman Stets <romko.stets@gmail.com>
+ * @todo make use of i2c.stream
+ *
  * Changelog:
  *     XX - ToDo...
  */
@@ -52,7 +56,7 @@ MPU6050.DEFAULT_ADDRESS = MPU6050.ADDRESS_AD0_LOW;
  * the clock source to use the X Gyro for reference, which is slightly better than
  * the default internal clock source.
  */
-MPU6050.prototype.initialize = function() {
+MPU6050.prototype.initialize = function(callback) {
   this.i2cdev = new I2cDev(this.address, {device : this.device});
   
   this.setClockSource(MPU6050.CLOCK_PLL_XGYRO);
@@ -64,10 +68,16 @@ MPU6050.prototype.initialize = function() {
 /**
  * Verify the I2C connection.
  * Make sure the device is connected and responds as expected.
- * @return True if connection is valid, false otherwise
+ * @param callback
  */
-MPU6050.prototype.testConnection = function() {
-  return this.getDeviceID() === 0x34;
+MPU6050.prototype.testConnection = function(callback) {
+  this.getDeviceID(function (err, data) {
+    if (err) {
+      return callback(err);
+    }
+    // Test device id.
+    callback(null, data === 0x34);
+  }); // ;
 };
 
 // WHO_AM_I register
@@ -79,10 +89,11 @@ MPU6050.WHO_AM_I_LENGTH = 6;
 /**
  * Get Device ID.
  * This register is used to verify the identity of the device (0b110100).
+ * @param callback
  * @return Device ID (should be 0x68, 104 dec, 150 oct)
  */
-MPU6050.prototype.getDeviceID = function() {
-  return this.i2cdev.readBits(MPU6050.RA_WHO_AM_I, MPU6050.WHO_AM_I_BIT, MPU6050.WHO_AM_I_LENGTH);
+MPU6050.prototype.getDeviceID = function(callback) {
+  this.i2cdev.readBits(MPU6050.RA_WHO_AM_I, MPU6050.WHO_AM_I_BIT, MPU6050.WHO_AM_I_LENGTH, callback);
 };
 
 /**
@@ -118,10 +129,10 @@ MPU6050.GYRO_FS_2000 = 0x03;
  * 3 = +/- 2000 degrees/sec
  * </pre>
  *
- * @return Current full-scale gyroscope range setting
+ * @param callback
  */
-MPU6050.prototype.getFullScaleGyroRange = function() {
-  return this.i2cdev.readBits(MPU6050.RA_GYRO_CONFIG, MPU6050.GCONFIG_FS_SEL_BIT, MPU6050.GCONFIG_FS_SEL_LENGTH);
+MPU6050.prototype.getFullScaleGyroRange = function(callback) {
+  this.i2cdev.readBits(MPU6050.RA_GYRO_CONFIG, MPU6050.GCONFIG_FS_SEL_BIT, MPU6050.GCONFIG_FS_SEL_LENGTH, callback);
 };
 
 /**
@@ -159,10 +170,10 @@ MPU6050.ACCEL_FS_16 = 0x03;
  * 3 = +/- 16g
  * </pre>
  *
- * @return Current full-scale accelerometer range setting
+ * @param callback
  */
-MPU6050.prototype.getFullScaleAccelRange = function() {
-  return this.i2cdev.readBits(MPU6050.RA_ACCEL_CONFIG, MPU6050.ACONFIG_AFS_SEL_BIT, MPU6050.ACONFIG_AFS_SEL_LENGTH);
+MPU6050.prototype.getFullScaleAccelRange = function(callback) {
+  this.i2cdev.readBits(MPU6050.RA_ACCEL_CONFIG, MPU6050.ACONFIG_AFS_SEL_BIT, MPU6050.ACONFIG_AFS_SEL_LENGTH, callback);
 };
 
 /**
@@ -214,16 +225,19 @@ MPU6050.RA_ACCEL_ZOUT_L = 0x40;
  * 2       | +/- 8g           | 2048 LSB/mg
  * 3       | +/- 16g          | 1024 LSB/mg
  * </pre>
- * 
- * @return An array containing the three accellerations.
+ *
+ * @param callback
  */
-MPU6050.prototype.getAcceleration = function() {
-  buffer = this.i2cdev.readBytes(MPU6050.RA_ACCEL_XOUT_H, 6);
-  return [
-    buffer.readInt16BE(0),
-    buffer.readInt16BE(2),
-    buffer.readInt16BE(4)
-  ];
+MPU6050.prototype.getAcceleration = function(callback) {
+  this.i2cdev.readBytes(MPU6050.RA_ACCEL_XOUT_H, 6, function(err, buffer){
+    if (err) return callback(err);
+
+    callback(null, [
+      buffer.readInt16BE(0),
+      buffer.readInt16BE(2),
+      buffer.readInt16BE(4)
+    ]);
+  });
 };
 
 /**
@@ -231,18 +245,21 @@ MPU6050.prototype.getAcceleration = function() {
  * Retrieves all currently available motion sensor values.
  * @see getAcceleration()
  * @see getRotation()
+ * @param callback
  */
-MPU6050.prototype.getMotion6 = function() {
-  buffer = this.i2cdev.readBytes(MPU6050.RA_ACCEL_XOUT_H, 14);
-  
-  return [
+MPU6050.prototype.getMotion6 = function(callback) {
+  this.i2cdev.readBytes(MPU6050.RA_ACCEL_XOUT_H, 14, function(err, buffer){
+    if (err) return callback(err);
+
+    callback(null, [
       buffer.readInt16BE(0),
       buffer.readInt16BE(2),
       buffer.readInt16BE(4),
       buffer.readInt16BE(8),
       buffer.readInt16BE(10),
       buffer.readInt16BE(12)
-  ];
+    ]);
+  });
 };
 
 // GYRO_*OUT_* registers
@@ -281,14 +298,14 @@ MPU6050.RA_GYRO_ZOUT_L = 0x48;
  * 3      | +/- 2000 degrees/s | 16.4 LSB/deg/s
  * </pre>
  *
- * @param x 16-bit signed integer container for X-axis rotation
- * @param y 16-bit signed integer container for Y-axis rotation
- * @param z 16-bit signed integer container for Z-axis rotation
+ * @param callback
  * @see getMotion6()
  */
-MPU6050.prototype.getRotation = function() {
-   var buffer = this.i2cdev.readBytes(MPU6050.RA_GYRO_XOUT_H, 6);
-   return [buffer.readInt16BE(0), buffer.readInt16BE(2), buffer.readInt16BE(4)];  
+MPU6050.prototype.getRotation = function(callback) {
+   this.i2cdev.readBytes(MPU6050.RA_GYRO_XOUT_H, 6, function(err, buffer){
+     if (err) return callback(err);
+     callback(null, [buffer.readInt16BE(0), buffer.readInt16BE(2), buffer.readInt16BE(4)]);
+   });
 };
 
 
@@ -309,12 +326,12 @@ MPU6050.PWR1_CLKSEL_LENGTH = 3;
  * puts the device back into normal mode. To save power, the individual standby
  * selections for each of the gyros should be used if any gyro axis is not used
  * by the application.
- * @return Current sleep mode enabled status
+ * @param callback
  * @see MPU6050_RA_PWR_MGMT_1
  * @see MPU6050_PWR1_SLEEP_BIT
  */
-MPU6050.prototype.getSleepEnabled = function() {
-  return this.i2cdev.readBit(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_SLEEP_BIT);
+MPU6050.prototype.getSleepEnabled = function(callback) {
+  this.i2cdev.readBit(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_SLEEP_BIT, callback);
 };
 
 /** Set sleep mode status.
@@ -329,10 +346,10 @@ MPU6050.prototype.setSleepEnabled = function(enabled) {
 
 /**
  * Get clock source setting.
- * @return Current clock source setting
+ * @param callback
  */
-MPU6050.prototype.getClockSource = function() {
-  return this.i2cdev.readBits(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_CLKSEL_BIT, MPU6050.PWR1_CLKSEL_LENGTH);
+MPU6050.prototype.getClockSource = function (callback) {
+  this.i2cdev.readBits(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_CLKSEL_BIT, MPU6050.PWR1_CLKSEL_LENGTH, callback);
 };
 
 /**
@@ -387,29 +404,30 @@ I2cDev.prototype.bitMask = function(bit, bitLength) {
 I2cDev.prototype.readBits = function(func, bit, bitLength, callback) {
   var mask = this.bitMask(bit, bitLength);
   
-  if (callback) {
-    this.readBytes(func, 1, function(err, buf) {
-      var bits = (buf[0] & mask) >> (1 + bit - bitLength);
-      callback(err, bits);
-    });
-  } else {
-    var buf = this.readBytes(func, 1);
-    return (buf[0] & mask) >> (1 + bit - bitLength);
-  }
+  this.readBytes(func, 1, function(err, buf) {
+    var bits = (buf[0] & mask) >> (1 + bit - bitLength);
+    callback(err, bits);
+  });
 };
 
 I2cDev.prototype.readBit = function(func, bit, bitLength, callback) {
-  return this.readBits(func, bit, 1, callback);
+  this.readBits(func, bit, 1, callback);
 };
 
-I2cDev.prototype.writeBits = function(func, bit, bitLength, value, callback) {
-  var oldValue = this.readBytes(func, 1);
-  var mask = this.bitMask(bit, bitLength);
-  var newValue = oldValue ^ ((oldValue ^ (value << bit)) & mask);
-  this.writeBytes(func, [newValue], callback);
+I2cDev.prototype.writeBits = function(func, bit, bitLength, value) {
+  var self = this;
+  self.readBytes(func, 1, function(err, oldValue) {
+    var mask = self.bitMask(bit, bitLength);
+    var newValue = oldValue ^ ((oldValue ^ (value << bit)) & mask);
+    self.writeBytes(func, [newValue], function (err) {
+      if (err) {
+        throw err;
+      }
+    });
+  });
 };
 
-I2cDev.prototype.writeBit = function(func, bit, value, callback) {
-  this.writeBits(func, bit, 1, value, callback);
+I2cDev.prototype.writeBit = function(func, bit, value) {
+  this.writeBits(func, bit, 1, value);
 };
 
