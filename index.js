@@ -56,7 +56,7 @@ MPU6050.DEFAULT_ADDRESS = MPU6050.ADDRESS_AD0_LOW;
  * the clock source to use the X Gyro for reference, which is slightly better than
  * the default internal clock source.
  */
-MPU6050.prototype.initialize = function(callback) {
+MPU6050.prototype.initialize = function() {
   this.i2cdev = new I2cDev(this.address, {device : this.device});
   
   this.setClockSource(MPU6050.CLOCK_PLL_XGYRO);

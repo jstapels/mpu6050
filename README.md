@@ -10,6 +10,26 @@ This module has been tested on a BeagleBone Black.
 npm install mpu6050
 ```
 
+## API Reference
+
+* MPU6050(device, address)
+* initialize()
+* testConnection(callback(err, data))
+* getDeviceID(callback(err, data))
+* setDeviceID(id)
+* getFullScaleGyroRange(callback(err, data))
+* setFullScaleGyroRange(range)
+* getFullScaleAccelRange(callback(err, data))
+* setFullScaleRange(range)
+* getAcceleration(callback(err, data))
+* getMotion6(callback(err, data))
+* getRotation(callback(err, data))
+* getSleepEnabled(callback(err, data))
+* setSleepEnabled(enabled)
+* getClockSource(callback(err, data))
+* setClockSource(source)
+
+
 ## Usage
 
 ```javascript
