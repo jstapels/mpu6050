@@ -384,6 +384,21 @@ MPU6050.prototype.setClockSource = function(source) {
   this.i2cdev.writeBits(MPU6050.RA_PWR_MGMT_1, MPU6050.PWR1_CLKSEL_BIT, MPU6050.PWR1_CLKSEL_LENGTH, source);
 };
 
+// TEMP_*OUT_* register
+
+MPU6050.RA_TEMP_OUT = 0x41;
+
+/**
+ * Get temperature in celsius degrees
+ */
+MPU6050.prototype.getTemperature = function(callback) {
+    this.i2cdev.readBytes(MPU6050.RA_TEMP_OUT, 2, function(err, buffer){
+        if (err) return callback(err);
+        var data = buffer.readInt16BE(0) / 340 + 35;
+        if (callback) callback(null, [data]);
+    });
+};
+
 module.exports = MPU6050;
 
 /**
