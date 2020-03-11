@@ -11,6 +11,7 @@
     "url": "https://github.com/jstapels/mpu6050.git"
   },
   "dependencies": {
+    "@abandonware/i2c": "^0.2.4-0",
     "i2c": "*"
   },
   "keywords": [
